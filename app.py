@@ -43,36 +43,30 @@ def search_naver_shopping(query, client_id, client_secret):
 st.title("🛒 네이버 쇼핑 단가 검토 자동화")
 st.markdown("""
 **사용 방법:**
-1. 좌측 메뉴에서 네이버 API 키가 잘 들어갔는지 확인해라.
-2. 검토할 **엑셀 양식 파일(.xlsx)**을 올려라.
-3. 실행 버튼을 누르면 원본 양식 그대로 **G열(상품가)**과 **I열(링크)**에 데이터가 채워진데이!
+1. 검토할 **엑셀 양식 파일(.xlsx)**을 올려라.
+2. 실행 버튼을 누르면 원본 양식 그대로 **G열(상품가)**과 **I열(링크)**에 데이터가 채워진데이!
 """)
 
-# --- 사이드바: API 키 설정 (보안상 st.secrets 사용 권장) ---
+# --- 사이드바: API 키 설정 (보안상 st.secrets 사용) ---
 with st.sidebar:
     st.header("🔑 API 키 설정")
-    st.info("실제 배포할 때는 깃허브 말고 Streamlit Secrets에 저장해야 안전하데이!")
     
-    # st.secrets에 키가 있으면 자동으로 불러오고, 없으면 입력칸 띄움
+    # st.secrets에 키가 등록되어 있으면 자동으로 불러오고 입력창 숨김!
     try:
-        default_id = st.secrets["NAVER_CLIENT_ID"]
-        default_secret = st.secrets["NAVER_CLIENT_SECRET"]
-        st.success("Secrets에서 API 키를 성공적으로 불러왔다!")
+        client_id = st.secrets["NAVER_CLIENT_ID"]
+        client_secret = st.secrets["NAVER_CLIENT_SECRET"]
+        st.success("✅ 서버 금고에서 API 키를 자동으로 삭 불러왔데이! (입력할 필요 없음)")
     except:
-        default_id = ""
-        default_secret = ""
-        st.warning("Secrets에 키가 없데이. 아래에 직접 입력해라.")
-        
-    client_id = st.text_input("Client ID", value=default_id, type="password")
-    client_secret = st.text_input("Client Secret", value=default_secret, type="password")
+        st.warning("⚠️ 서버 금고에 등록된 키가 없데이. 아래에 직접 입력해라.")
+        client_id = st.text_input("Client ID", type="password")
+        client_secret = st.text_input("Client Secret", type="password")
 
 # --- 엑셀 파일 업로드 ---
 uploaded_file = st.file_uploader("엑셀 파일(.xlsx)을 여기다 던져라", type=["xlsx"])
 
 if uploaded_file is not None:
     try:
-        # 화면에 엑셀 데이터 살짝 보여주기
-        # 니 양식 헤더가 3줄이라서 4번째 줄부터 읽게 하려면 header=2 (0부터 시작하니까)
+        # 화면에 엑셀 데이터 살짝 보여주기 (니 양식 헤더가 3줄이라서 4번째 줄부터 읽게 하려면 header=2)
         df_preview = pd.read_excel(uploaded_file, header=2)
              
         st.subheader("📊 니가 올린 엑셀 데이터 (미리보기)")
@@ -80,7 +74,7 @@ if uploaded_file is not None:
         
         if st.button("🚀 최저가 긁어오기 시작!"):
             if not client_id or not client_secret:
-                st.error("API 키(Client ID, Secret)를 먼저 입력해야지!")
+                st.error("마! API 키(Client ID, Secret)가 없으면 조회를 몬한데이!")
             else:
                 progress_text = "열심히 검색 중이데이... 쫌만 기다리라..."
                 
