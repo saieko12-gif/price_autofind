@@ -32,11 +32,26 @@ def search_naver_shopping(query, client_id, client_secret):
             item = data['items'][0]
             # HTML 태그 제거 (<b> 등)
             title = item['title'].replace('<b>', '').replace('</b>', '')
+            
+            # --- 💡 핵심 업데이트: 엑셀 튕김 방지 & 최저가 상품 다이렉트 링크 생성 ---
+            product_type = item.get('productType', '0')
+            product_id = item.get('productId', '')
+            raw_link = item['link']
+            
+            # productType '1'이나 '3'은 네이버 가격비교(카탈로그) 상품임
+            if product_type in ['1', '3'] and product_id:
+                # 추적 링크 버리고, 카탈로그 고유 ID로 100% 안전한 직접 링크 조립!
+                direct_link = f"https://search.shopping.naver.com/catalog/{product_id}"
+            else:
+                # 카탈로그 상품이 아니면 어쩔 수 없이 원본 링크를 쓰되, 
+                # 엑셀 비정상 접근 방지를 위해 구글 우회(리다이렉트)를 태움!
+                direct_link = f"https://www.google.com/url?q={urllib.parse.quote(raw_link)}"
+
             return {
                 "검색된 상품명": title,
                 "최저가(원)": int(item['lprice']),
                 "쇼핑몰": item['mallName'],
-                "링크": item['link'] # API가 주는 링크 (이제 이건 안 쓰고 참고만 함)
+                "링크": direct_link
             }
         else:
             return {"검색된 상품명": "검색 결과 없음", "최저가(원)": 0, "쇼핑몰": "-", "링크": "-"}
@@ -156,9 +171,8 @@ if uploaded_file is not None:
                         # G열: 상품가
                         ws[f'G{row}'].value = search_result["최저가(원)"]
                         
-                        # I열: 링크 (추적 링크 버리고, 비정상 접근 막는 '안전한 직접 검색 링크' 맹글어가 꽂아넣기)
-                        safe_link = f"https://search.shopping.naver.com/search/all?query={urllib.parse.quote(final_query)}"
-                        ws[f'I{row}'].value = safe_link
+                        # I열: 링크 (비정상 접근 막으면서 상세페이지로 바로 꽂히는 링크!)
+                        ws[f'I{row}'].value = search_result["링크"]
                     else:
                         ws[f'G{row}'].value = "결과 없음"
                         ws[f'I{row}'].value = "-"
