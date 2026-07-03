@@ -5,6 +5,7 @@ import time
 from io import BytesIO
 import openpyxl # 엑셀 서식 유지하면서 셀만 수정하기 위해 추가됨
 import re # 대괄호 제거를 위한 정규표현식 라이브러리 추가
+import urllib.parse # 비정상적 접근 튕김 방지용 안전한 링크 생성을 위해 추가
 
 # --- 페이지 기본 설정 ---
 st.set_page_config(page_title="단가 검토 자동화 봇", page_icon="🛒", layout="wide")
@@ -35,7 +36,7 @@ def search_naver_shopping(query, client_id, client_secret):
                 "검색된 상품명": title,
                 "최저가(원)": int(item['lprice']),
                 "쇼핑몰": item['mallName'],
-                "링크": item['link']
+                "링크": item['link'] # API가 주는 링크 (이제 이건 안 쓰고 참고만 함)
             }
         else:
             return {"검색된 상품명": "검색 결과 없음", "최저가(원)": 0, "쇼핑몰": "-", "링크": "-"}
@@ -154,12 +155,13 @@ if uploaded_file is not None:
                     if search_result["최저가(원)"] > 0:
                         # G열: 상품가
                         ws[f'G{row}'].value = search_result["최저가(원)"]
+                        
+                        # I열: 링크 (추적 링크 버리고, 비정상 접근 막는 '안전한 직접 검색 링크' 맹글어가 꽂아넣기)
+                        safe_link = f"https://search.shopping.naver.com/search/all?query={urllib.parse.quote(final_query)}"
+                        ws[f'I{row}'].value = safe_link
                     else:
                         ws[f'G{row}'].value = "결과 없음"
-                        
-                    # I열: 링크
-                    if search_result["링크"] != "-":
-                        ws[f'I{row}'].value = search_result["링크"]
+                        ws[f'I{row}'].value = "-"
                         
                     # 진행률 쫙쫙 올려주기
                     if total_items > 0:
