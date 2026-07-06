@@ -83,6 +83,36 @@ with st.sidebar:
         client_id = st.text_input("Client ID", type="password")
         client_secret = st.text_input("Client Secret", type="password")
 
+# --- 💡 낱개 상품 바로 검색 기능 추가 ---
+st.subheader("🔍 하나씩 바로 검색하기")
+st.markdown("엑셀 파일 올리기 귀찮고 딱 하나만 급하게 찾고 싶을 때 여기서 쳐라!")
+
+col1, col2 = st.columns([4, 1])
+with col1:
+    single_query = st.text_input("단일 검색", label_visibility="collapsed", placeholder="예: 3M 6006k 필터")
+with col2:
+    single_search_btn = st.button("🚀 바로 검색", use_container_width=True)
+
+if single_search_btn:
+    if not client_id or not client_secret:
+        st.error("마! API 키부터 넣고 온나!")
+    elif not single_query:
+        st.warning("마! 검색어를 입력해야 찾제!")
+    else:
+        with st.spinner("네이버 싹 다 뒤지는 중이데이..."):
+            result = search_naver_shopping(single_query, client_id, client_secret)
+            
+            if result["최저가(원)"] > 0:
+                st.success(f"🎉 찾았다! 최저가: **{result['최저가(원)']:,}원**")
+                st.info(f"🏷️ 상품명: {result['검색된 상품명']}")
+                st.markdown(f"**[👉 여기 누르면 최저가 상품으로 바로 간데이!]({result['링크']})**")
+            else:
+                st.error("마, 그런 상품은 없다 카네. 검색어 쪼매 바꿔서 다시 해봐라.")
+
+st.divider() # 위아래 구분하게 선 하나 시원하게 긋기
+
+st.subheader("📁 엑셀로 대량 검색하기")
+
 # --- 엑셀 파일 업로드 ---
 uploaded_file = st.file_uploader("엑셀 파일(.xlsx)을 여기다 던져라", type=["xlsx"])
 
