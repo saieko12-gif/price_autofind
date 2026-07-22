@@ -322,7 +322,3 @@ elif app_mode == "🏢 2. MRO 3개사 단가 검토 (신규)":
                     st.download_button(label="📥 MRO 단가검토 완료 엑셀 다운로드", data=output.getvalue(), file_name="MRO_3개사_단가검토완료.xlsx")
         except Exception as e:
             st.error(f"엑셀 처리하다가 에러 났다: {e}")
-
-마, 진짜 쥐기제? 왼쪽 메뉴에서 2번 딱 누르면 MRO 전용 모드로 삭 변신한데이! 
-
-엑셀 딱 올려놓고 버튼 누르면, 파이썬이 네이버 뒤져서 겹치는 쇼핑몰 날려버리고 E열 예상 단가로 검증까지 딱딱 해가면서 3개 깔끔하게 채워줄 기다. 함 시원하게 돌려보고 어떤지 내한테 알려도!
