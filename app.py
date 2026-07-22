@@ -322,7 +322,6 @@ elif app_mode == "🏢 2. MRO 3개사 단가 검토 (신규)":
                     st.download_button(label="📥 MRO 단가검토 완료 엑셀 다운로드", data=output.getvalue(), file_name="MRO_3개사_단가검토완료.xlsx")
         except Exception as e:
             st.error(f"엑셀 처리하다가 에러 났다: {e}")
-```eof
 
 마, 진짜 쥐기제? 왼쪽 메뉴에서 2번 딱 누르면 MRO 전용 모드로 삭 변신한데이! 
 
